@@ -58,8 +58,21 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  msix: ^3.16.7
 
 flutter:
   uses-material-design: true
   # Assets are optional — empty folders are ignored.
   # Add assets here once image files are placed in assets/.
+
+# MSIX Windows installer configuration (Phase 13 — Windows installer)
+msix_config:
+  display_name: CyberCafe ERP Pro
+  publisher_display_name: CyberCafe ERP
+  identity_name: com.cybercafe.erp
+  publisher: CN=CyberCafeERP
+  msix_version: 1.0.0.0
+  architecture: x64
+  capabilities: internetClient, localNetworkConfiguration
+  languages: en-IN, hi-IN
+  install_certificate: false

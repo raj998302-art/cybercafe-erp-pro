@@ -13,10 +13,17 @@ const List<NavItem> _navItems = [
   NavItem('/', Icons.dashboard_outlined, 'Dashboard'),
   NavItem('/billing', Icons.receipt_long_outlined, 'Billing'),
   NavItem('/customers', Icons.people_outline, 'Customers'),
+  NavItem('/suppliers', Icons.local_shipping_outlined, 'Suppliers'),
   NavItem('/inventory', Icons.inventory_2_outlined, 'Items'),
   NavItem('/accounting', Icons.account_balance_outlined, 'Accounts'),
+  NavItem('/expenses', Icons.money_off_outlined, 'Expenses'),
   NavItem('/gst', Icons.receipt_outlined, 'GST'),
   NavItem('/reports', Icons.assessment_outlined, 'Reports'),
+  NavItem('/payroll', Icons.badge_outlined, 'Payroll'),
+  NavItem('/designer', Icons.design_services_outlined, 'Designer'),
+  NavItem('/calculator', Icons.calculate_outlined, 'Calculator'),
+  NavItem('/notes', Icons.sticky_note_2_outlined, 'Notes'),
+  NavItem('/help', Icons.help_outline, 'Help'),
   NavItem('/settings', Icons.settings_outlined, 'Settings'),
 ];
 
@@ -34,25 +41,39 @@ class ShellScaffold extends StatelessWidget {
       body: Row(
         children: [
           if (isWide)
-            NavigationRail(
-              selectedIndex: _selectedIndex(location),
-              onDestinationSelected: (i) => context.go(_navItems[i].path),
-              extended: MediaQuery.of(context).size.width >= 1400,
-              minExtendedWidth: 220,
-              backgroundColor: theme.colorScheme.surface,
-              indicatorColor: theme.colorScheme.primary,
-              selectedIconTheme: IconThemeData(color: theme.colorScheme.onPrimary),
-              selectedLabelTextStyle: TextStyle(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
+            SizedBox(
+              width: MediaQuery.of(context).size.width >= 1400 ? 240 : 72,
+              child: Drawer(
+                backgroundColor: theme.colorScheme.surface,
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    const _AppBrand(),
+                    ..._navItems.map((n) {
+                      final selected = _isSelected(location, n.path);
+                      return ListTile(
+                        leading: Icon(n.icon,
+                            color: selected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant),
+                        title: MediaQuery.of(context).size.width >= 1400
+                            ? Text(n.label,
+                                style: TextStyle(
+                                    fontWeight: selected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: selected
+                                        ? theme.colorScheme.primary
+                                        : null))
+                            : null,
+                        selected: selected,
+                        selectedTileColor: theme.colorScheme.primaryContainer,
+                        onTap: () => context.go(n.path),
+                      );
+                    }).toList(),
+                  ],
+                ),
               ),
-              leading: const _AppBrand(),
-              destinations: _navItems
-                  .map((n) => NavigationRailDestination(
-                        icon: Icon(n.icon),
-                        label: Text(n.label),
-                      ))
-                  .toList(),
             )
           else
             Container(),
@@ -72,6 +93,7 @@ class ShellScaffold extends StatelessWidget {
               selectedIndex: _selectedIndex(location),
               onDestinationSelected: (i) => context.go(_navItems[i].path),
               destinations: _navItems
+                  .take(5)
                   .map((n) => NavigationDestination(
                         icon: Icon(n.icon),
                         label: n.label,
@@ -81,22 +103,21 @@ class ShellScaffold extends StatelessWidget {
     );
   }
 
+  bool _isSelected(String location, String path) {
+    if (path == '/') return location == '/';
+    return location.startsWith(path);
+  }
+
   int _selectedIndex(String location) {
     for (int i = 0; i < _navItems.length; i++) {
-      if (location.startsWith(_navItems[i].path == '/' ? '/' : _navItems[i].path)) {
-        if (_navItems[i].path == '/' && location != '/') continue;
-        return i;
-      }
+      if (_isSelected(location, _navItems[i].path)) return i;
     }
     return 0;
   }
 
   String _currentTitle(String location) {
     for (final n in _navItems) {
-      if (location.startsWith(n.path == '/' ? '/' : n.path)) {
-        if (n.path == '/' && location != '/') continue;
-        return n.label;
-      }
+      if (_isSelected(location, n.path)) return n.label;
     }
     return AppConfig.appName;
   }
@@ -107,22 +128,26 @@ class _AppBrand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+    final isWide = MediaQuery.of(context).size.width >= 1400;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
       child: Column(
         children: [
           CircleAvatar(
+            radius: 24,
             backgroundColor: Theme.of(context).colorScheme.primary,
-            child: const Icon(Icons.store, color: Colors.white),
+            child: const Icon(Icons.store, color: Colors.white, size: 24),
           ),
-          const SizedBox(height: 8),
-          Text(
-            AppConfig.appName,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-            textAlign: TextAlign.center,
-          ),
+          if (isWide) ...[
+            const SizedBox(height: 8),
+            Text(
+              AppConfig.appName,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ],
       ),
     );

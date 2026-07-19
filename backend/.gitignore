@@ -1,0 +1,5 @@
+node_modules/
+logs/
+dist/
+*.log
+# NOTE: .env is intentionally committed for this project (user-provided temp credentials)

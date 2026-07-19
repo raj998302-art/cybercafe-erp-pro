@@ -1,0 +1,48 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+**/generated_plugin_registrant.dart
+
+# Android
+android/.gradle/
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/key.properties
+*.keystore
+*.jks
+**/android/**/gradle-wrapper.jar
+
+# Windows
+windows/flutter/ephemeral/
+windows/runner/Debug/
+windows/runner/Release/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend
+backend/node_modules/
+*.log
+# NOTE: backend/.env is intentionally committed (user-provided temp MongoDB + token)
+
+# Build outputs
+*.apk
+*.aab
+*.ipa
+*.exe
+*.msix

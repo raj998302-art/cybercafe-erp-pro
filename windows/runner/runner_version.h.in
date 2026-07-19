@@ -1,0 +1,14 @@
+#pragma once
+
+#define IDR_VERSION 1
+
+#define VER_MAJOR 1
+#define VER_MINOR 0
+#define VER_PATCH 0
+#define VER_BUILD 0
+
+#define STRINGIFY(x) #x
+#define MAKE_STRING(x) STRINGIFY(x)
+
+#define VER_FILE_STRING \
+  MAKE_STRING(VER_MAJOR) "." MAKE_STRING(VER_MINOR) "." MAKE_STRING(VER_PATCH) "." MAKE_STRING(VER_BUILD)

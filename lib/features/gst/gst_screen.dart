@@ -104,8 +104,8 @@ class _GstScreenState extends State<GstScreen> {
                               DataColumn(label: Text('Date')),
                               DataColumn(label: Text('Customer')),
                               DataColumn(label: Text('GSTIN')),
-                              DataColumn(label: Text('Value', numeric: true)),
-                              DataColumn(label: Text('GST', numeric: true)),
+                              DataColumn(label: Text('Value'), numeric: true),
+                              DataColumn(label: Text('GST'), numeric: true),
                               DataColumn(label: Text('Status')),
                             ],
                             rows: _rows

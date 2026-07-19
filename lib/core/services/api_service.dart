@@ -60,44 +60,62 @@ class ApiService {
   }
 
   // ----- Customers -----
-  Future<List<Map<String, dynamic>>> fetchCustomers() async =>
-      (_get('/customer')['data'] as List).cast<Map<String, dynamic>>();
-  Future<Map<String, dynamic>> createCustomer(Map<String, dynamic> c) =>
+  Future<List<Map<String, dynamic>>> fetchCustomers() async {
+    final res = await _get('/customer');
+    final data = res['data'];
+    if (data is List) return data.cast<Map<String, dynamic>>();
+    if (data is Map && data['items'] is List) {
+      return (data['items'] as List).cast<Map<String, dynamic>>();
+    }
+    return [];
+  }
+
+  Future<Map<String, dynamic>> createCustomer(Map<String, dynamic> c) async =>
       _post('/customer', c);
-  Future<Map<String, dynamic>> updateCustomer(String id, Map<String, dynamic> c) =>
+  Future<Map<String, dynamic>> updateCustomer(String id, Map<String, dynamic> c) async =>
       _put('/customer/$id', c);
-  Future<void> deleteCustomer(String id) => _delete('/customer/$id');
+  Future<void> deleteCustomer(String id) async => _delete('/customer/$id');
 
   // ----- Items -----
-  Future<List<Map<String, dynamic>>> fetchItems() async =>
-      (_get('/item')['data'] as List).cast<Map<String, dynamic>>();
-  Future<Map<String, dynamic>> createItem(Map<String, dynamic> i) =>
+  Future<List<Map<String, dynamic>>> fetchItems() async {
+    final res = await _get('/item');
+    final data = res['data'];
+    if (data is List) return data.cast<Map<String, dynamic>>();
+    return [];
+  }
+
+  Future<Map<String, dynamic>> createItem(Map<String, dynamic> i) async =>
       _post('/item', i);
-  Future<Map<String, dynamic>> seedItems() => _get('/item/seed');
+  Future<Map<String, dynamic>> seedItems() async => _get('/item/seed');
 
   // ----- Bills -----
-  Future<List<Map<String, dynamic>>> fetchBills() async =>
-      (_get('/bill')['data'] as List).cast<Map<String, dynamic>>();
-  Future<Map<String, dynamic>> createBill(Map<String, dynamic> b) =>
+  Future<List<Map<String, dynamic>>> fetchBills() async {
+    final res = await _get('/bill');
+    final data = res['data'];
+    if (data is List) return data.cast<Map<String, dynamic>>();
+    return [];
+  }
+
+  Future<Map<String, dynamic>> createBill(Map<String, dynamic> b) async =>
       _post('/bill', b);
-  Future<Map<String, dynamic>> todayBillCount() => _get('/bill/today/count');
-  Future<Map<String, dynamic>> monthSummary() => _get('/bill/month/summary');
+  Future<Map<String, dynamic>> todayBillCount() async => _get('/bill/today/count');
+  Future<Map<String, dynamic>> monthSummary() async => _get('/bill/month/summary');
 
   // ----- Reports -----
-  Future<Map<String, dynamic>> salesSummary() => _get('/report/sales-summary');
-  Future<Map<String, dynamic>> gstSummary() => _get('/report/gst-summary');
+  Future<Map<String, dynamic>> salesSummary() async => _get('/report/sales-summary');
+  Future<Map<String, dynamic>> gstSummary() async => _get('/report/gst-summary');
 
   // ----- GST -----
-  Future<Map<String, dynamic>> gstr1(String from, String to) =>
+  Future<Map<String, dynamic>> gstr1(String from, String to) async =>
       _get('/gst/gstr1?from=$from&to=$to');
-  Future<Map<String, dynamic>> gstr3b(String month) =>
+  Future<Map<String, dynamic>> gstr3b(String month) async =>
       _get('/gst/gstr3b?month=$month');
 
   // ----- Backup / Sync -----
-  Future<Map<String, dynamic>> exportAll() => _get('/backup/export');
-  Future<Map<String, dynamic>> importAll(Map<String, dynamic> data) =>
+  Future<Map<String, dynamic>> exportAll() async => _get('/backup/export');
+  Future<Map<String, dynamic>> importAll(Map<String, dynamic> data) async =>
       _post('/backup/import', data);
-  Future<Map<String, dynamic>> syncAll() => _get('/sync/all');
+  Future<Map<String, dynamic>> syncAll() async => _get('/sync/all');
 }
 
 class ApiException implements Exception {

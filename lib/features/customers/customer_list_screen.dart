@@ -81,8 +81,8 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                                 }
                               },
                               itemBuilder: (_) => const [
-                                PopupItem(value: 'edit', child: Text('Edit')),
-                                PopupItem(
+                                PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                PopupMenuItem(
                                     value: 'delete', child: Text('Delete')),
                               ],
                             ),

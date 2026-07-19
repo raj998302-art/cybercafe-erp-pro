@@ -1,4 +1,4 @@
-name: Build Windows Desktop App
+name: Build Windows Desktop App (.msix + .exe)
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-windows:
-    name: Build Windows .exe (Release)
+    name: Build Windows .exe + .msix (Release)
     runs-on: windows-latest
     timeout-minutes: 45
 
@@ -31,28 +31,46 @@ jobs:
       - name: Flutter doctor
         run: flutter doctor -v
 
+      - name: Generate Windows platform scaffolding
+        run: |
+          # Generate the standard windows/ runner if missing or incomplete.
+          flutter create . --platforms=windows --org com.cybercafe --project-name cybercafe_erp
+
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Windows release
+      - name: Build Windows release (.exe)
         run: flutter build windows --release
 
-      - name: Package release folder
+      - name: Install msix CLI tool
+        run: dart pub global activate msix
+
+      - name: Build .msix installer
+        run: |
+          $env:Path += ";$env:USERPROFILE\AppData\Roaming\Pub\Cache\bin"
+          msix --version 1.0.0.0 --display-name "CyberCafe ERP Pro" --publisher "CN=CyberCafeERP" --architecture x64 --capabilities internetClient,localNetworkConfiguration || true
+
+      - name: Package release folder (.zip)
         shell: pwsh
         run: |
           $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | Select-Object -First 1).Line.Split(' ')[1].Split('+')[0]
           $shortSha = "${{ github.sha }}".Substring(0,7)
           $zipName = "CyberCafeERP-$version-$shortSha-windows.zip"
           Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath $zipName
-          echo "zip_name=$zipName" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "zip_name=$zipName" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
           Write-Host "Created $zipName"
+          Get-ChildItem *.zip,*.msix -ErrorAction SilentlyContinue | Format-Table Name,Length
 
-      - name: Upload Windows artifact
+      - name: Upload Windows .zip artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cybercafe-erp-windows
-          path: ${{ env.zip_name }}
+          name: cybercafe-erp-windows-zip
+          path: |
+            ${{ env.zip_name }}
+            build/windows/x64/runner/Release/*.msix
           retention-days: 90
+          if-no-files-found: warn
 
       - name: Create GitHub Release (on tag)
         if: startsWith(github.ref, 'refs/tags/')
@@ -60,6 +78,17 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: CyberCafe ERP Pro (Windows) ${{ github.ref_name }}
-          files: ${{ env.zip_name }}
+          body: |
+            ## CyberCafe ERP Pro — Windows Release
+
+            - **Version:** ${{ env.version }}
+            - **Commit:** ${{ github.sha }}
+
+            ### Downloads
+            - `.zip` portable build (contains CyberCafeERP.exe + all DLLs)
+            - `.msix` Windows installer (if generated)
+          files: |
+            ${{ env.zip_name }}
+            build/windows/x64/runner/Release/*.msix
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

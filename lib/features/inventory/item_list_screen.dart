@@ -93,9 +93,9 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                     }
                                   },
                                   itemBuilder: (_) => const [
-                                    PopupItem(
+                                    PopupMenuItem(
                                         value: 'edit', child: Text('Edit')),
-                                    PopupItem(
+                                    PopupMenuItem(
                                         value: 'delete', child: Text('Delete')),
                                   ],
                                 ),

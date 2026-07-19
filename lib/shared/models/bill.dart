@@ -1,4 +1,5 @@
 import '../../core/database/db_helper.dart';
+import '../../core/database/database_init.dart';
 
 class BillItem {
   final int? id;

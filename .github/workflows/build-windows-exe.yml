@@ -42,13 +42,11 @@ jobs:
       - name: Build Windows release (.exe)
         run: flutter build windows --release
 
-      - name: Install msix CLI tool
-        run: dart pub global activate msix
-
-      - name: Build .msix installer
+      - name: Build .msix installer (optional, non-fatal)
         run: |
-          $env:Path += ";$env:USERPROFILE\AppData\Roaming\Pub\Cache\bin"
-          msix --version 1.0.0.0 --display-name "CyberCafe ERP Pro" --publisher "CN=CyberCafeERP" --architecture x64 --capabilities internetClient,localNetworkConfiguration || true
+          # msix is a dev_dependency; run via dart. Non-fatal if it fails.
+          dart run msix:create --version 1.0.0.0 --architecture x64 2>&1 || true
+          Get-ChildItem build\windows\x64\runner\Release\*.msix -ErrorAction SilentlyContinue | Format-Table Name,Length
 
       - name: Package release folder (.zip)
         shell: pwsh

@@ -45,6 +45,12 @@ jobs:
           dart --version
           flutter doctor -v
 
+      - name: Scaffold missing Android files (mipmap icons, etc.)
+        run: |
+          # Generates default launcher icons and any missing template files
+          # without overwriting our custom AndroidManifest.xml / build.gradle.
+          flutter create . --platforms=android --org com.cybercafe --project-name cybercafe_erp
+
       - name: Create android/local.properties
         run: |
           FLUTTER_PATH=$(which flutter)

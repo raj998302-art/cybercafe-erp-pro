@@ -133,7 +133,8 @@ class _AccountingScreenState extends State<AccountingScreen> {
     String vtype = 'Receipt';
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setS) => AlertDialog(
         title: const Text('New Voucher'),
         content: SizedBox(
           width: 420,
@@ -148,7 +149,7 @@ class _AccountingScreenState extends State<AccountingScreen> {
                 items: AppConfig.voucherTypes
                     .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                     .toList(),
-                onChanged: (v) => vtype = v ?? 'Receipt',
+                onChanged: (v) => setS(() => vtype = v ?? 'Receipt'),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -208,6 +209,7 @@ class _AccountingScreenState extends State<AccountingScreen> {
             child: const Text('Save'),
           ),
         ],
+      ),
       ),
     );
   }

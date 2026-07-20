@@ -254,6 +254,24 @@ class DatabaseInit {
     batch.execute('''CREATE TABLE documents (
         id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, entity_type TEXT, entity_id INTEGER, file_path TEXT, description TEXT, created_at TEXT)''');
 
+    // ---- Tables created by feature screens at runtime (also in _onCreate for fresh installs) ----
+    batch.execute('''CREATE TABLE IF NOT EXISTS reminders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, description TEXT,
+        remind_date TEXT NOT NULL, type TEXT DEFAULT 'custom', done INTEGER DEFAULT 0, created_at TEXT)''');
+    batch.execute('''CREATE TABLE IF NOT EXISTS cheques (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, cheque_no TEXT NOT NULL,
+        bank TEXT, amount REAL, issue_date TEXT, clearance_date TEXT, party_name TEXT,
+        status TEXT DEFAULT 'pending', notes TEXT, created_at TEXT)''');
+    batch.execute('''CREATE TABLE IF NOT EXISTS notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, body TEXT,
+        color TEXT DEFAULT '#FFF9C4', created_at TEXT, updated_at TEXT)''');
+    batch.execute('''CREATE TABLE IF NOT EXISTS companies_list (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, gstin TEXT, pan TEXT,
+        address TEXT, state TEXT, phone TEXT, email TEXT, is_active INTEGER DEFAULT 0, created_at TEXT)''');
+    batch.execute('''CREATE TABLE IF NOT EXISTS recycle_bin (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, source_table TEXT NOT NULL,
+        record_id INTEGER NOT NULL, record_data TEXT NOT NULL, deleted_at TEXT NOT NULL)''');
+
     await batch.commit(noResult: true);
 
     // Seed default settings

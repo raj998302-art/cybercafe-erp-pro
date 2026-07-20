@@ -52,9 +52,13 @@ class _BillingCreateScreenState extends State<BillingCreateScreen> {
   double get _change => _paid > _total ? _paid - _total : 0;
 
   // GST breakup (intra-state: CGST+SGST, inter-state: IGST)
+  // Intra-state when customer state is empty (walk-in) OR matches shop state.
   Map<String, double> get _gstBreakup {
-    final intraState = _customer?.state?.toLowerCase() != 'other';
-    return GstService.breakup(_taxable, _gst > 0 ? (_gst / _taxable * 100) : 0, intraState);
+    final customerState = _customer?.state ?? '';
+    final shopState = 'Maharashtra'; // default; should come from company settings
+    final intraState = customerState.isEmpty ||
+        customerState.toLowerCase() == shopState.toLowerCase();
+    return GstService.breakup(_taxable, _gst > 0 && _taxable > 0 ? (_gst / _taxable * 100) : 0, intraState);
   }
 
   @override

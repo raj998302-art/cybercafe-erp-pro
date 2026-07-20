@@ -265,8 +265,11 @@ class _PayrollScreenState extends State<PayrollScreen> {
 
   void _showPayslip(BuildContext context, _Employee e) {
     final epf = e.basicSalary * 0.12;
-    final esi = e.gross * 0.0075;
-    final net = e.gross - epf - esi;
+    // ESI only applies if gross salary is below ₹21,000/month
+    final esi = e.gross < 21000 ? e.gross * 0.0075 : 0.0;
+    // Professional Tax: ₹200/month for salary > ₹15,000 in Maharashtra
+    final pt = e.gross > 15000 ? 200.0 : 0.0;
+    final net = e.gross - epf - esi - pt;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -288,6 +291,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
               const Divider(),
               _r('EPF (12% basic)', -epf),
               _r('ESI (0.75% gross)', -esi),
+              _r('Professional Tax', -pt),
               const Divider(),
               _r('Net Pay', net, bold: true, color: Colors.green),
             ],

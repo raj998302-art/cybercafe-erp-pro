@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/database/db_helper.dart';
 import '../../core/printing/pdf_invoice_service.dart';
-import '../../shared/models/bill.dart';
+import '../../shared/models/bill.dart' show Bill, BillRepository;
 
 /// Phase 13 — Printing System: Thermal, Label, Print Queue, Email, WhatsApp, SMS.
 class PrintingSystemScreen extends StatefulWidget {
@@ -53,19 +53,12 @@ class _PrintingSystemScreenState extends State<PrintingSystemScreen>
         leading: const Icon(Icons.receipt, color: Colors.teal),
         title: Text(b['bill_number'] as String),
         subtitle: Text('${b['customer_name']} • ${b['bill_date']?.toString().substring(0, 10) ?? ""}'),
-        trailing: FilledButton(onPressed: () {
-          final bill = Bill(
-            billNumber: b['bill_number'], billDate: b['bill_date'],
-            customerName: b['customer_name'], customerPhone: b['customer_phone'],
-            customerGstin: b['customer_gstin'], customerAddress: b['customer_address'],
-            subtotal: (b['subtotal'] as num?)?.toDouble() ?? 0,
-            grandTotal: (b['grand_total'] as num?)?.toDouble() ?? 0,
-            totalGst: (b['total_gst'] as num?)?.toDouble() ?? 0,
-            totalDiscount: (b['total_discount'] as num?)?.toDouble() ?? 0,
-            roundOff: (b['round_off'] as num?)?.toDouble() ?? 0,
-            paymentMode: b['payment_mode'] ?? 'Cash',
-            paymentStatus: b['payment_status'] ?? 'unpaid',
-          );
+        trailing: FilledButton(onPressed: () async {
+          // Load full bill with items from BillRepository
+          final id = b['id'] as int?;
+          if (id == null) return;
+          final bill = await BillRepository.get(id);
+          if (bill == null) return;
           onPrint(bill);
         }, child: const Text('Print')),
       ))),

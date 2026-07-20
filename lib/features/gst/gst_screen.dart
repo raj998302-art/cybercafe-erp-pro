@@ -9,7 +9,8 @@ class GstScreen extends StatefulWidget {
 }
 
 class _GstScreenState extends State<GstScreen> {
-  String _period = DateTime.now().toIso8601String().substring(0, 7); // YYYY-MM
+  late String _period;
+  late TextEditingController _periodCtrl;
   List<Map<String, dynamic>> _rows = [];
   double _totalTax = 0;
   double _totalValue = 0;
@@ -18,20 +19,21 @@ class _GstScreenState extends State<GstScreen> {
   @override
   void initState() {
     super.initState();
+    _period = DateTime.now().toIso8601String().substring(0, 7);
+    _periodCtrl = TextEditingController(text: _period);
     _load();
   }
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final from = '$_period-01';
-    final to = '$_period-31';
+    // Use LIKE prefix match so Feb/Apr/Jun/Sep/Nov (30-day months) work correctly
     final rows = await DbHelper.rawQuery('''
       SELECT bill_number, bill_date, customer_name, customer_gstin,
              grand_total, total_gst, payment_status
       FROM bills
-      WHERE bill_date BETWEEN ? AND ?
+      WHERE bill_date LIKE ? || '%'
       ORDER BY bill_date DESC
-    ''', [from, to]);
+    ''', [_period]);
     double tax = 0, val = 0;
     for (final r in rows) {
       tax += (r['total_gst'] as num?)?.toDouble() ?? 0;
@@ -43,6 +45,12 @@ class _GstScreenState extends State<GstScreen> {
       _totalValue = val;
       _loading = false;
     });
+  }
+
+  @override
+  void dispose() {
+    _periodCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -64,7 +72,7 @@ class _GstScreenState extends State<GstScreen> {
                     labelText: 'Period (YYYY-MM)',
                     border: OutlineInputBorder(),
                   ),
-                  controller: TextEditingController(text: _period),
+                  controller: _periodCtrl,
                   onChanged: (v) {
                     if (v.length == 7) {
                       _period = v;

@@ -30,12 +30,14 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', protect, async (req, res, next) => {
   try {
     const { username, password, name, role } = req.body;
     if (!username || !password || !name) {
       return sendError(res, 400, 'username, password and name are required');
     }
+    // Only admins can create new users; non-admins can only create 'viewer'
+    const allowedRole = req.user?.role === 'admin' ? (role || 'operator') : 'viewer';
     const exists = await User.findOne({ username: username.toLowerCase() });
     if (exists) {
       return sendError(res, 409, 'Username already exists');
@@ -44,7 +46,7 @@ router.post('/register', async (req, res, next) => {
       username: username.toLowerCase(),
       passwordHash: password,
       name,
-      role: role || 'operator',
+      role: allowedRole,
     });
     await user.save();
     const token = signToken(user._id);

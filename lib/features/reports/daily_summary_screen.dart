@@ -27,6 +27,13 @@ class _DailySummaryScreenState extends State<DailySummaryScreen> {
   }
 
   Future<void> _load() async {
+    // Reset accumulators before loading (prevents double-count on refresh)
+    _totalSales = 0;
+    _totalGst = 0;
+    _totalDiscount = 0;
+    _modeBreakup = {};
+    _paidCount = 0;
+    _unpaidCount = 0;
     final today = DateTime.now().toIso8601String().substring(0, 10);
     _bills = await DbHelper.query('bills', where: 'bill_date LIKE ?', whereArgs: ['$today%'], orderBy: 'id DESC');
     for (final b in _bills) {

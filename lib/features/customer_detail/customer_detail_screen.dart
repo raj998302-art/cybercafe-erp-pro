@@ -31,9 +31,22 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
     _load();
   }
 
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     final c = await CustomerRepository.get(widget.customerId);
-    if (c == null) return;
+    if (c == null) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Customer not found')));
+      }
+      return;
+    }
     _customer = c;
     _bills = await DbHelper.rawQuery(
         'SELECT * FROM bills WHERE customer_id = ? ORDER BY bill_date DESC',

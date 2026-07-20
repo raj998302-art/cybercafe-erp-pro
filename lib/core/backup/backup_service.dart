@@ -72,19 +72,24 @@ class BackupService {
   static Future<int> importFromJson(String json) async {
     final data = jsonDecode(json) as Map<String, dynamic>;
     final db = await DatabaseInit.database;
+    // Reverse order so child tables (bill_items) are deleted before parents (bills)
+    // to avoid FK constraint failures. Also disable FK during bulk load.
     final tables = [
-      'company', 'settings', 'customers', 'suppliers', 'items',
-      'bills', 'bill_items', 'expenses', 'vouchers', 'voucher_entries',
-      'ledgers', 'audit_log',
-      'cost_centers', 'budgets', 'bank_reconciliation', 'currencies', 'fixed_assets',
-      'categories', 'batches', 'godowns', 'stock_transfers', 'bom', 'purchase_orders',
-      'tds_entries', 'tcs_entries',
-      'employees', 'attendance', 'leaves', 'salary_runs',
-      'vehicles', 'fuel_entries', 'documents',
-      'reminders', 'cheques', 'notes', 'companies_list', 'recycle_bin',
+      'recycle_bin', 'companies_list', 'notes', 'cheques', 'reminders',
+      'documents', 'fuel_entries', 'vehicles',
+      'salary_runs', 'leaves', 'attendance', 'employees',
+      'tcs_entries', 'tds_entries',
+      'purchase_orders', 'bom', 'stock_transfers', 'godowns', 'batches', 'categories',
+      'fixed_assets', 'currencies', 'bank_reconciliation', 'budgets', 'cost_centers',
+      'audit_log', 'voucher_entries', 'vouchers', 'ledgers',
+      'bill_items', 'bills', 'expenses',
+      'items', 'suppliers', 'customers',
+      'settings', 'company',
     ];
     int count = 0;
     await db.transaction((txn) async {
+      // Disable FK checks during bulk load
+      await txn.execute('PRAGMA foreign_keys = OFF');
       for (final t in tables) {
         final rows = data[t];
         if (rows is! List) continue;
@@ -99,6 +104,7 @@ class BackupService {
           } catch (_) {}
         }
       }
+      await txn.execute('PRAGMA foreign_keys = ON');
     });
     return count;
   }

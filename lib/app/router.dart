@@ -38,7 +38,6 @@ class AppRouter {
     initialLocation: '/',
     routes: [
       GoRoute(path: '/login', name: 'login', builder: (c, s) => const LoginScreen()),
-      GoRoute(path: '/customer/:id', builder: (c, s) => CustomerDetailScreen(customerId: int.parse(s.pathParameters['id']!))),
       ShellRoute(
         builder: (context, state, child) => ShellScaffold(child: child),
         routes: [
@@ -46,6 +45,13 @@ class AppRouter {
           GoRoute(path: '/billing', name: 'billing', builder: (c, s) => const BillingListScreen()),
           GoRoute(path: '/billing/new', name: 'billing-new', builder: (c, s) => const BillingCreateScreen()),
           GoRoute(path: '/customers', name: 'customers', builder: (c, s) => const CustomerListScreen()),
+          GoRoute(
+            path: '/customer/:id',
+            builder: (c, s) {
+              final id = int.tryParse(s.pathParameters['id'] ?? '0') ?? 0;
+              return CustomerDetailScreen(customerId: id);
+            },
+          ),
           GoRoute(path: '/suppliers', name: 'suppliers', builder: (c, s) => const SupplierScreen()),
           GoRoute(path: '/inventory', name: 'inventory', builder: (c, s) => const ItemListScreen()),
           GoRoute(path: '/purchase', name: 'purchase', builder: (c, s) => const PurchaseScreen()),

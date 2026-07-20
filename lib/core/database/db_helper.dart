@@ -8,6 +8,15 @@ class DbHelper {
 
   static Future<int> insert(String table, Map<String, dynamic> row) async {
     final db = await _db;
+    // Use ABORT (default) instead of REPLACE to avoid silent data loss
+    // when a UNIQUE constraint is violated (e.g., duplicate bill_number).
+    return db.insert(table, row);
+  }
+
+  /// Explicit upsert — replaces on UNIQUE conflict. Use only when you
+  /// intentionally want to overwrite an existing row by its PK/UNIQUE key.
+  static Future<int> upsert(String table, Map<String, dynamic> row) async {
+    final db = await _db;
     return db.insert(table, row,
         conflictAlgorithm: ConflictAlgorithm.replace);
   }

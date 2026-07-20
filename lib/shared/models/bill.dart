@@ -184,16 +184,29 @@ class BillRepository {
     final number = bill.billNumber.isEmpty
         ? await _nextBillNumber()
         : bill.billNumber;
-    final billId = await db.insert(_bills, {
-      ...bill.toMap(),
-      'bill_number': number,
-      'created_at': now,
-      'updated_at': now,
+    // Wrap bill + items insert in a transaction to prevent partial saves
+    return db.transaction((txn) async {
+      final billId = await txn.insert(_bills, {
+        ...bill.toMap(),
+        'bill_number': number,
+        'created_at': now,
+        'updated_at': now,
+      });
+      for (final it in bill.items) {
+        await txn.insert(_items, {...it.toMap(), 'bill_id': billId});
+      }
+      return billId;
     });
-    for (final it in bill.items) {
-      await db.insert(_items, {...it.toMap(), 'bill_id': billId});
-    }
-    return billId;
+  }
+
+  /// Update an existing bill's payment status / paid amount.
+  static Future<int> updatePayment(int id, {required double paidAmount, required String status, required double balanceDue}) async {
+    return DbHelper.update(_bills, {
+      'paid_amount': paidAmount,
+      'payment_status': status,
+      'balance_due': balanceDue,
+      'updated_at': DateTime.now().toIso8601String(),
+    }, where: 'id = ?', whereArgs: [id]);
   }
 
   static Future<List<Bill>> all({String? q, int? limit}) async {

@@ -105,7 +105,8 @@ class ShellScaffold extends StatelessWidget {
       bottomNavigationBar: isWide
           ? null
           : NavigationBar(
-              selectedIndex: _selectedIndex(location),
+              // Clamp to first 5 items to avoid RangeError (selectedIndex 0-4 only)
+              selectedIndex: (_selectedIndex(location) > 4 ? 0 : _selectedIndex(location)),
               onDestinationSelected: (i) => context.go(_navItems[i].path),
               destinations: _navItems
                   .take(5)

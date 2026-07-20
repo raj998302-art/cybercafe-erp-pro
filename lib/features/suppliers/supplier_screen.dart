@@ -217,6 +217,8 @@ class _SupplierScreenState extends State<SupplierScreen> {
                 gstin: gstin.text.trim().toUpperCase(),
                 address: address.text.trim(),
                 openingBalance: double.tryParse(opening.text) ?? 0,
+                // Preserve existing balanceType — don't silently reset to 'credit'
+                balanceType: supplier?.balanceType ?? 'credit',
                 notes: notes.text.trim(),
               ));
               Navigator.pop(ctx);

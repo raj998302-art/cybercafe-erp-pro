@@ -67,6 +67,27 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
+    // Guard against null customer (e.g., not found / deleted)
+    if (_customer == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Customer Not Found')),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.person_off, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text('This customer could not be loaded.'),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () => context.go('/customers'),
+                child: const Text('Back to Customers'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     final c = _customer!;
     return Scaffold(
       appBar: AppBar(

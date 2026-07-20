@@ -22,6 +22,12 @@ class _LoginScreenState extends State<LoginScreen> {
     _ensureDefaultPin();
   }
 
+  @override
+  void dispose() {
+    _pinCtrl.dispose();
+    super.dispose();
+  }
+
   Future<void> _ensureDefaultPin() async {
     final row = await DbHelper.first('settings', where: 'key = ?', whereArgs: ['app_pin']);
     if (row == null) {
@@ -37,13 +43,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final row = await DbHelper.first('settings', where: 'key = ?', whereArgs: ['app_pin']);
     final storedPin = row?['value'] as String? ?? '1234';
     await Future.delayed(const Duration(milliseconds: 300));
-    if (_pinCtrl.text == storedPin) {
+    if (_pinCtrl.text.trim() == storedPin) {
       if (mounted) context.go('/');
     } else {
-      setState(() {
-        _error = 'Wrong PIN. Try again. (Default: 1234)';
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Wrong PIN. Try again. (Default: 1234)';
+          _loading = false;
+        });
+      }
     }
   }
 

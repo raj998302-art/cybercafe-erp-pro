@@ -54,7 +54,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
 
   Map<String, dynamic> _decode(String s) {
     try {
-      final d = s.replaceAll(RegExp(r"[{}\"]"), '').split(',');
+      final d = s.replaceAll(RegExp(r'[{}"]'), '').split(',');
       final m = <String, dynamic>{};
       for (final e in d) {
         final p = e.split(':');

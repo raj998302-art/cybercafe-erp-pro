@@ -27,6 +27,12 @@ class _VehicleScreenState extends State<VehicleScreen>
     _load();
   }
 
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
   Future<void> _ensureTables() async {
     for (final sql in [
       "CREATE TABLE IF NOT EXISTS vehicles (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, number TEXT, fuel_type TEXT, odometer INTEGER DEFAULT 0, created_at TEXT)",

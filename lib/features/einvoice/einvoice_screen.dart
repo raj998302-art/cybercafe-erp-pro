@@ -28,6 +28,12 @@ class _EInvoiceScreenState extends State<EInvoiceScreen>
     _load();
   }
 
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     _bills = await DbHelper.query('bills',
         where: 'customer_gstin IS NOT NULL AND customer_gstin != ""',

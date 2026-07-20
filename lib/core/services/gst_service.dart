@@ -8,12 +8,15 @@ class GstService {
       double taxable, double gstRate, bool isIntraState) {
     final gst = taxable * gstRate / 100;
     if (isIntraState) {
-      final half = gst / 2;
+      // Ensure cgst + sgst == total exactly (avoid 0.01 rounding mismatch)
+      final totalGst = round(gst);
+      final cgst = (totalGst / 2).roundToDouble();
+      final sgst = totalGst - cgst;
       return {
-        'cgst': round(half),
-        'sgst': round(half),
+        'cgst': cgst,
+        'sgst': sgst,
         'igst': 0,
-        'total': round(gst),
+        'total': totalGst,
       };
     }
     return {

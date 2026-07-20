@@ -27,6 +27,12 @@ class _PurchaseScreenState extends State<PurchaseScreen>
     _load();
   }
 
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
   Future<void> _ensureTables() async {
     for (final sql in [
       "CREATE TABLE IF NOT EXISTS purchase_orders (id INTEGER PRIMARY KEY AUTOINCREMENT, po_number TEXT, date TEXT, supplier_id INTEGER, items TEXT, total REAL, status TEXT DEFAULT 'pending', created_at TEXT)",
@@ -155,6 +161,12 @@ class _GstComplianceScreenState extends State<GstComplianceScreen>
     super.initState();
     _tab = TabController(length: 5, vsync: this);
     _ensureTables();
+  }
+
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
   }
 
   Future<void> _ensureTables() async {

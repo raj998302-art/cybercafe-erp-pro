@@ -16,6 +16,15 @@ class _UpiQrScreenState extends State<UpiQrScreen> {
   final _amountCtrl = TextEditingController(text: '');
   final _noteCtrl = TextEditingController(text: '');
 
+  @override
+  void dispose() {
+    _vpaCtrl.dispose();
+    _nameCtrl.dispose();
+    _amountCtrl.dispose();
+    _noteCtrl.dispose();
+    super.dispose();
+  }
+
   String get _upiUri {
     final vpa = _vpaCtrl.text.trim();
     final name = Uri.encodeComponent(_nameCtrl.text.trim());

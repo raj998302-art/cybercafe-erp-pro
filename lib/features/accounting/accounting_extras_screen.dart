@@ -23,6 +23,12 @@ class _AccountingExtrasScreenState extends State<AccountingExtrasScreen>
     _ensureTables();
   }
 
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
   Future<void> _ensureTables() async {
     for (final sql in [
       "CREATE TABLE IF NOT EXISTS cost_centers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, category TEXT, parent_id INTEGER, created_at TEXT)",

@@ -90,7 +90,7 @@ class _PrintingSystemScreenState extends State<PrintingSystemScreen>
   });
 
   Widget _queueTab() => Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-    const Icon(Icons.print_queue, size: 80, color: Colors.grey),
+    const Icon(Icons.print, size: 80, color: Colors.grey),
     const SizedBox(height: 16),
     const Text('Print Queue', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
     const Text('No items in queue'),

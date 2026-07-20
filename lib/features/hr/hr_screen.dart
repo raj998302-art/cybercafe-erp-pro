@@ -96,13 +96,13 @@ class _AttTabState extends State<_AttTab> {
   }
 
   void _markAttendance() {
-    String? empId;
+    int? empId;
     String status = 'present';
     showDialog(context: context, builder: (ctx) => StatefulBuilder(builder: (ctx, setS) => AlertDialog(
       title: const Text('Mark Attendance'),
       content: SizedBox(width: 350, child: Column(mainAxisSize: MainAxisSize.min, children: [
         DropdownButtonFormField<int>(value: empId, decoration: const InputDecoration(labelText: 'Employee', border: OutlineInputBorder()),
-          items: _emps.map((e) => DropdownMenuItem(value: e['id'] as int, child: Text(e['name']))).toList(),
+          items: _emps.map((e) => DropdownMenuItem<int>(value: e['id'] as int, child: Text(e['name'] as String))).toList(),
           onChanged: (v) => setS(() => empId = v)),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(value: status, decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
@@ -171,13 +171,13 @@ class _LeaveTabState extends State<_LeaveTab> {
     final from = TextEditingController();
     final to = TextEditingController();
     final reason = TextEditingController();
-    String? empId;
+    int? empId;
     String type = 'casual';
     showDialog(context: context, builder: (ctx) => StatefulBuilder(builder: (ctx, setS) => AlertDialog(
       title: const Text('Apply Leave'),
       content: SizedBox(width: 350, child: Column(mainAxisSize: MainAxisSize.min, children: [
         DropdownButtonFormField<int>(value: empId, decoration: const InputDecoration(labelText: 'Employee', border: OutlineInputBorder()),
-          items: _emps.map((e) => DropdownMenuItem(value: e['id'] as int, child: Text(e['name']))).toList(),
+          items: _emps.map((e) => DropdownMenuItem<int>(value: e['id'] as int, child: Text(e['name'] as String))).toList(),
           onChanged: (v) => setS(() => empId = v)),
         const SizedBox(height: 12),
         TextField(controller: from, decoration: const InputDecoration(labelText: 'From (YYYY-MM-DD)', border: OutlineInputBorder())),
@@ -274,10 +274,21 @@ class _StatutoryTab extends StatelessWidget {
     ]);
   }
 
-  Widget _card(BuildContext context, String title, String subtitle, String btn, IconData icon, Color color) => Card(child: ListTile(
-    leading: Icon(icon, color: color, size: 40),
-    title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-    subtitle: Text(subtitle),
-    trailing: FilledButton(onPressed: () { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$title: Use Advanced Reports for data')); }, child: Text(btn)),
-  ));
+  Widget _card(BuildContext context, String title, String subtitle, String btn, IconData icon, Color color) {
+    return Card(
+      child: ListTile(
+        leading: Icon(icon, color: color, size: 40),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(subtitle),
+        trailing: FilledButton(
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$title: Use Advanced Reports for data')),
+            );
+          },
+          child: Text(btn),
+        ),
+      ),
+    );
+  }
 }

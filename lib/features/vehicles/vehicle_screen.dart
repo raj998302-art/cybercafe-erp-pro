@@ -140,7 +140,7 @@ class _VehicleScreenState extends State<VehicleScreen>
         TextField(controller: odometer, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Odometer (km)', border: OutlineInputBorder())),
         const SizedBox(height: 8),
         TextField(controller: station, decoration: const InputDecoration(labelText: 'Station', border: OutlineInputBorder())),
-      ])),
+      ]))),
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
         FilledButton(onPressed: () async {

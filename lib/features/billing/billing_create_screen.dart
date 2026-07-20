@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../shared/providers/app_providers.dart';
-import '../../shared/models/bill.dart';
+import '../../shared/models/bill.dart' show Bill, BillItem, BillRepository;
 import '../../shared/models/customer.dart';
 import '../../shared/models/item.dart';
 import '../../core/services/gst_service.dart';
@@ -464,12 +464,15 @@ class _BillingCreateScreenState extends State<BillingCreateScreen> {
       }
     }
 
+    // Fetch the saved bill to get the generated bill number (for PDF filename)
+    final savedBill = await BillRepository.get(id);
+
     if (mounted) {
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Bill saved! ID #$id')));
-      // Offer to print PDF
-      _offerPrint(bill);
+          SnackBar(content: Text('Bill saved! ${savedBill?.billNumber ?? "#$id"}')));
+      // Offer to print PDF using the saved bill (has correct bill number)
+      _offerPrint(savedBill ?? bill);
     }
   }
 
@@ -486,7 +489,16 @@ class _BillingCreateScreenState extends State<BillingCreateScreen> {
           OutlinedButton.icon(
             onPressed: () async {
               try {
-                final path = await PdfInvoiceService.generateAndSave(bill);
+                // Load company details for the PDF header
+                final comp = await DbHelper.first('company');
+                final companyMap = <String, String>{
+                  'name': (comp?['name'] as String?) ?? 'My Cyber Cafe',
+                  'address': '${comp?['address_line1'] ?? ""} ${comp?['city'] ?? ""} ${comp?['state'] ?? ""} ${comp?['pincode'] ?? ""}'.trim(),
+                  'phone': (comp?['phone'] as String?) ?? '',
+                  'gstin': (comp?['gstin'] as String?) ?? '',
+                  'terms': (await DbHelper.first('settings', where: 'key = ?', whereArgs: ['terms_conditions']))?['value'] as String? ?? '',
+                };
+                final path = await PdfInvoiceService.generateAndSave(bill, company: companyMap);
                 if (ctx.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('PDF saved: $path')));

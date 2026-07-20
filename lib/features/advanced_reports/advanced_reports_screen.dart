@@ -59,8 +59,9 @@ class _AdvancedReportsScreenState extends State<AdvancedReportsScreen> {
             'SELECT name, SUM(qty) AS qty, SUM(total) AS amount FROM bill_items GROUP BY name ORDER BY amount DESC LIMIT 10');
         break;
       case 'profit_loss':
+        // Revenue = subtotal - discount (excludes GST, which is a liability not income)
         final sales = await DbHelper.rawQuery(
-            'SELECT COALESCE(SUM(grand_total),0) AS v FROM bills');
+            'SELECT COALESCE(SUM(subtotal - total_discount),0) AS v FROM bills');
         final exp = await DbHelper.rawQuery(
             'SELECT COALESCE(SUM(amount),0) AS v FROM expenses');
         data['sales'] = (sales.first['v'] as num?)?.toDouble() ?? 0;

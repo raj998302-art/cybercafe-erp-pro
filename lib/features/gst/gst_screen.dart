@@ -29,7 +29,7 @@ class _GstScreenState extends State<GstScreen> {
     // Use LIKE prefix match so Feb/Apr/Jun/Sep/Nov (30-day months) work correctly
     final rows = await DbHelper.rawQuery('''
       SELECT bill_number, bill_date, customer_name, customer_gstin,
-             grand_total, total_gst, payment_status
+             subtotal, total_discount, grand_total, total_gst, payment_status
       FROM bills
       WHERE bill_date LIKE ? || '%'
       ORDER BY bill_date DESC
@@ -37,7 +37,10 @@ class _GstScreenState extends State<GstScreen> {
     double tax = 0, val = 0;
     for (final r in rows) {
       tax += (r['total_gst'] as num?)?.toDouble() ?? 0;
-      val += (r['grand_total'] as num?)?.toDouble() ?? 0;
+      // Taxable value = subtotal - discount (excludes GST)
+      final sub = (r['subtotal'] as num?)?.toDouble() ?? 0;
+      final disc = (r['total_discount'] as num?)?.toDouble() ?? 0;
+      val += sub - disc;
     }
     setState(() {
       _rows = rows;

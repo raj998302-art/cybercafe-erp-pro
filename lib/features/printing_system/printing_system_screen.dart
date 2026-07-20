@@ -45,6 +45,16 @@ class _PrintingSystemScreenState extends State<PrintingSystemScreen>
     );
   }
 
+  Future<Map<String, String>> _loadCompany() async {
+    final comp = await DbHelper.first('company');
+    return {
+      'name': (comp?['name'] as String?) ?? 'My Cyber Cafe',
+      'address': '${comp?['address_line1'] ?? ""} ${comp?['city'] ?? ""}'.trim(),
+      'phone': (comp?['phone'] as String?) ?? '',
+      'gstin': (comp?['gstin'] as String?) ?? '',
+    };
+  }
+
   Widget _billSelector(String label, Function(Bill) onPrint) {
     return ListView(padding: const EdgeInsets.all(16), children: [
       Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -67,7 +77,7 @@ class _PrintingSystemScreenState extends State<PrintingSystemScreen>
 
   Widget _a4Tab() => _billSelector('A4 / A5 / Letter PDF Print', (b) async {
     try {
-      final path = await PdfInvoiceService.generateAndSave(b);
+      final path = await PdfInvoiceService.generateAndSave(b, company: await _loadCompany());
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('A4 PDF saved: $path')));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));

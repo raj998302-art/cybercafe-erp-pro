@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../shared/providers/app_providers.dart';
 import '../../core/services/gst_service.dart';
+import '../../core/database/db_helper.dart';
 import '../../core/printing/pdf_invoice_service.dart';
 import '../../shared/models/bill.dart';
 
@@ -131,7 +132,14 @@ class _BillingListScreenState extends State<BillingListScreen> {
                 onTap: () async {
                   Navigator.pop(ctx);
                   try {
-                    final path = await PdfInvoiceService.generateAndSave(b);
+                    final comp = await DbHelper.first('company');
+                    final companyMap = <String, String>{
+                      'name': (comp?['name'] as String?) ?? 'My Cyber Cafe',
+                      'address': '${comp?['address_line1'] ?? ""} ${comp?['city'] ?? ""}'.trim(),
+                      'phone': (comp?['phone'] as String?) ?? '',
+                      'gstin': (comp?['gstin'] as String?) ?? '',
+                    };
+                    final path = await PdfInvoiceService.generateAndSave(b, company: companyMap);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('PDF saved: $path')));

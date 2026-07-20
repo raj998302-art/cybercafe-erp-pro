@@ -219,6 +219,9 @@ class _ItemListScreenState extends State<ItemListScreen> {
                       isService: isService,
                       active: item?.active ?? true,
                       sortOrder: item?.sortOrder ?? 0,
+                      // Preserve existing stock — don't zero it on edit
+                      stockQty: item?.stockQty ?? 0,
+                      minStock: item?.minStock ?? 0,
                     ));
                 Navigator.pop(ctx);
               },

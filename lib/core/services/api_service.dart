@@ -112,7 +112,7 @@ class ApiService {
       _get('/gst/gstr3b?month=$month');
 
   // ----- Backup / Sync -----
-  Future<Map<String, dynamic>> exportAll() async => _get('/backup/export');
+  Future<Map<String, dynamic>> exportAll() async => _post('/backup/export');
   Future<Map<String, dynamic>> importAll(Map<String, dynamic> data) async =>
       _post('/backup/import', data);
   Future<Map<String, dynamic>> syncAll() async => _get('/sync/all');

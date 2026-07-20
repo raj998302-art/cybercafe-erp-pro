@@ -39,6 +39,9 @@ dependencies:
   file_picker: ^8.1.2
   open_filex: ^4.4.0
 
+  # URL launcher (WhatsApp, email, browser)
+  url_launcher: ^6.3.1
+
   # Utilities
   intl: ^0.19.0
   uuid: ^4.4.2

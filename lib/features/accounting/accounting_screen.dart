@@ -174,15 +174,33 @@ class _AccountingScreenState extends State<AccountingScreen> {
           FilledButton(
             onPressed: () async {
               final amt = double.tryParse(amtCtrl.text) ?? 0;
-              final count = await DbHelper.count('vouchers');
-              final vno = '${vtype.substring(0, 3).toUpperCase()}-${count + 1}';
-              await DbHelper.insert('vouchers', {
+              // Generate unique voucher number using timestamp
+              final ts = DateTime.now().millisecondsSinceEpoch;
+              final vno = '${vtype.substring(0, 3).toUpperCase()}-$ts';
+              final voucherId = await DbHelper.insert('vouchers', {
                 'voucher_type': vtype,
                 'voucher_number': vno,
                 'date': DateTime.now().toIso8601String(),
                 'narration': narrCtrl.text,
                 'amount': amt,
                 'created_at': DateTime.now().toIso8601String(),
+              });
+              // Double-entry: create Dr and Cr entries based on voucher type
+              final debitLedger = _debitLedgerFor(vtype);
+              final creditLedger = _creditLedgerFor(vtype);
+              await DbHelper.insert('voucher_entries', {
+                'voucher_id': voucherId,
+                'ledger': debitLedger,
+                'debit': amt,
+                'credit': 0,
+                'narration': narrCtrl.text,
+              });
+              await DbHelper.insert('voucher_entries', {
+                'voucher_id': voucherId,
+                'ledger': creditLedger,
+                'debit': 0,
+                'credit': amt,
+                'narration': narrCtrl.text,
               });
               if (mounted) Navigator.pop(ctx);
               _load();
@@ -192,5 +210,35 @@ class _AccountingScreenState extends State<AccountingScreen> {
         ],
       ),
     );
+  }
+
+  /// Returns the debit ledger for a voucher type (Tally double-entry rules).
+  String _debitLedgerFor(String type) {
+    switch (type) {
+      case 'Receipt': return 'Cash/Bank';
+      case 'Payment': return 'Expense/Ledger';
+      case 'Sales': return 'Customer (Debtor)';
+      case 'Purchase': return 'Purchase Account';
+      case 'Journal': return 'Ledger A';
+      case 'Credit Note': return 'Sales Return';
+      case 'Debit Note': return 'Supplier (Creditor)';
+      case 'Contra': return 'Cash';
+      default: return 'Ledger A';
+    }
+  }
+
+  /// Returns the credit ledger for a voucher type.
+  String _creditLedgerFor(String type) {
+    switch (type) {
+      case 'Receipt': return 'Customer (Debtor)';
+      case 'Payment': return 'Cash/Bank';
+      case 'Sales': return 'Sales Account';
+      case 'Purchase': return 'Supplier (Creditor)';
+      case 'Journal': return 'Ledger B';
+      case 'Credit Note': return 'Customer (Debtor)';
+      case 'Debit Note': return 'Purchase Return';
+      case 'Contra': return 'Bank';
+      default: return 'Ledger B';
+    }
   }
 }

@@ -7,6 +7,7 @@ class Customer {
   final String email;
   final String gstin;
   final String address;
+  final String state;
   final double openingBalance;
   final String balanceType; // debit / credit
   final String tags;
@@ -21,6 +22,7 @@ class Customer {
     this.email = '',
     this.gstin = '',
     this.address = '',
+    this.state = '',
     this.openingBalance = 0,
     this.balanceType = 'debit',
     this.tags = '',
@@ -36,6 +38,7 @@ class Customer {
         email: (m['email'] ?? '') as String,
         gstin: (m['gstin'] ?? '') as String,
         address: (m['address'] ?? '') as String,
+        state: (m['state'] ?? '') as String,
         openingBalance: (m['opening_balance'] as num?)?.toDouble() ?? 0,
         balanceType: (m['balance_type'] ?? 'debit') as String,
         tags: (m['tags'] ?? '') as String,
@@ -51,6 +54,7 @@ class Customer {
         'email': email,
         'gstin': gstin,
         'address': address,
+        'state': state,
         'opening_balance': openingBalance,
         'balance_type': balanceType,
         'tags': tags,
@@ -58,6 +62,33 @@ class Customer {
         if (createdAt != null) 'created_at': createdAt,
         if (updatedAt != null) 'updated_at': updatedAt,
       };
+
+  Customer copyWith({
+    int? id,
+    String? name,
+    String? phone,
+    String? email,
+    String? gstin,
+    String? address,
+    String? state,
+    double? openingBalance,
+    String? balanceType,
+    String? tags,
+    String? notes,
+  }) =>
+      Customer(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        phone: phone ?? this.phone,
+        email: email ?? this.email,
+        gstin: gstin ?? this.gstin,
+        address: address ?? this.address,
+        state: state ?? this.state,
+        openingBalance: openingBalance ?? this.openingBalance,
+        balanceType: balanceType ?? this.balanceType,
+        tags: tags ?? this.tags,
+        notes: notes ?? this.notes,
+      );
 }
 
 class CustomerRepository {

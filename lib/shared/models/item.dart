@@ -75,6 +75,39 @@ class Item {
         if (createdAt != null) 'created_at': createdAt,
         if (updatedAt != null) 'updated_at': updatedAt,
       };
+
+  Item copyWith({
+    int? id,
+    String? name,
+    String? shortName,
+    String? category,
+    String? unit,
+    double? price,
+    double? gstRate,
+    String? hsnCode,
+    String? sacCode,
+    double? stockQty,
+    double? minStock,
+    bool? isService,
+    bool? active,
+    int? sortOrder,
+  }) =>
+      Item(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        shortName: shortName ?? this.shortName,
+        category: category ?? this.category,
+        unit: unit ?? this.unit,
+        price: price ?? this.price,
+        gstRate: gstRate ?? this.gstRate,
+        hsnCode: hsnCode ?? this.hsnCode,
+        sacCode: sacCode ?? this.sacCode,
+        stockQty: stockQty ?? this.stockQty,
+        minStock: minStock ?? this.minStock,
+        isService: isService ?? this.isService,
+        active: active ?? this.active,
+        sortOrder: sortOrder ?? this.sortOrder,
+      );
 }
 
 /// Default cyber cafe items pre-loaded on first run.

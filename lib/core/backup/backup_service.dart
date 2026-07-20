@@ -33,6 +33,17 @@ class BackupService {
       'company', 'settings', 'customers', 'suppliers', 'items',
       'bills', 'bill_items', 'expenses', 'vouchers', 'voucher_entries',
       'ledgers', 'audit_log',
+      // Phase 3
+      'cost_centers', 'budgets', 'bank_reconciliation', 'currencies', 'fixed_assets',
+      // Phase 5
+      'categories', 'batches', 'godowns', 'stock_transfers', 'bom', 'purchase_orders',
+      // Phase 7
+      'tds_entries', 'tcs_entries',
+      // Phase 9
+      'employees', 'attendance', 'leaves', 'salary_runs',
+      // Phase 14
+      'vehicles', 'fuel_entries', 'documents',
+      'reminders', 'cheques', 'notes', 'companies_list', 'recycle_bin',
     ];
     final out = <String, dynamic>{
       'meta': {
@@ -42,7 +53,11 @@ class BackupService {
       },
     };
     for (final t in tables) {
-      out[t] = await db.query(t);
+      try {
+        out[t] = await db.query(t);
+      } catch (_) {
+        out[t] = [];
+      }
     }
     return JsonEncoder.withIndent('  ').convert(out);
   }
@@ -61,18 +76,30 @@ class BackupService {
       'company', 'settings', 'customers', 'suppliers', 'items',
       'bills', 'bill_items', 'expenses', 'vouchers', 'voucher_entries',
       'ledgers', 'audit_log',
+      'cost_centers', 'budgets', 'bank_reconciliation', 'currencies', 'fixed_assets',
+      'categories', 'batches', 'godowns', 'stock_transfers', 'bom', 'purchase_orders',
+      'tds_entries', 'tcs_entries',
+      'employees', 'attendance', 'leaves', 'salary_runs',
+      'vehicles', 'fuel_entries', 'documents',
+      'reminders', 'cheques', 'notes', 'companies_list', 'recycle_bin',
     ];
     int count = 0;
-    for (final t in tables) {
-      final rows = data[t];
-      if (rows is! List) continue;
-      await db.execute('DELETE FROM $t');
-      for (final r in rows) {
-        await db.insert(t, r as Map<String, Object?>,
-            conflictAlgorithm: ConflictAlgorithm.replace);
-        count++;
+    await db.transaction((txn) async {
+      for (final t in tables) {
+        final rows = data[t];
+        if (rows is! List) continue;
+        try {
+          await txn.execute('DELETE FROM $t');
+        } catch (_) {}
+        for (final r in rows) {
+          try {
+            await txn.insert(t, r as Map<String, Object?>,
+                conflictAlgorithm: ConflictAlgorithm.replace);
+            count++;
+          } catch (_) {}
+        }
       }
-    }
+    });
     return count;
   }
 

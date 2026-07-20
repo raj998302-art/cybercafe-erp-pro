@@ -45,11 +45,14 @@ router.post('/vouchers', async (req, res, next) => {
   try {
     const body = req.body;
     const count = await Voucher.countDocuments({ voucherType: body.voucherType });
-    const vno = body.voucherNumber || `${body.voucherType?.substring(0, 3).toUpperCase()}-${count + 1}`;
+    const vno = body.voucherNumber || `${body.voucherType?.substring(0, 3).toUpperCase()}-${count + 1}-${Date.now()}`;
+    const amount = body.entries?.reduce((s, e) => s + (e.debit || 0), 0)
+      || body.entries?.reduce((s, e) => s + (e.credit || 0), 0)
+      || body.amount || 0;
     const doc = await Voucher.create({
       ...body,
       voucherNumber: vno,
-      amount: body.entries?.reduce((s, e) => s + (e.debit || 0), 0) || 0,
+      amount,
     });
     return sendSuccess(res, doc, 'Voucher created', 201);
   } catch (err) {

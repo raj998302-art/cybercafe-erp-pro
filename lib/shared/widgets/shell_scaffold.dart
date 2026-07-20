@@ -12,20 +12,28 @@ class NavItem {
 const List<NavItem> _navItems = [
   NavItem('/', Icons.dashboard_outlined, 'Dashboard'),
   NavItem('/billing', Icons.receipt_long_outlined, 'Billing'),
+  NavItem('/daily-summary', Icons.summarize_outlined, 'Daily Summary'),
   NavItem('/customers', Icons.people_outline, 'Customers'),
   NavItem('/suppliers', Icons.local_shipping_outlined, 'Suppliers'),
   NavItem('/inventory', Icons.inventory_2_outlined, 'Items'),
+  NavItem('/purchase', Icons.shopping_cart_outlined, 'Purchase & Stock'),
   NavItem('/accounting', Icons.account_balance_outlined, 'Accounts'),
+  NavItem('/accounting-extras', Icons.account_balance_wallet_outlined, 'Tally Advanced'),
   NavItem('/expenses', Icons.money_off_outlined, 'Expenses'),
   NavItem('/payroll', Icons.badge_outlined, 'Payroll'),
+  NavItem('/hr', Icons.groups_outlined, 'HR / Attendance'),
   NavItem('/gst', Icons.receipt_outlined, 'GST Returns'),
+  NavItem('/gst-compliance', Icons.fact_check_outlined, 'TDS/TCS/GSTR-2B'),
   NavItem('/einvoice', Icons.qr_code_outlined, 'E-Invoice / EWB'),
   NavItem('/reports', Icons.assessment_outlined, 'Reports'),
   NavItem('/advanced-reports', Icons.analytics_outlined, 'Advanced Reports'),
   NavItem('/designer', Icons.design_services_outlined, 'Invoice Designer'),
+  NavItem('/printing', Icons.print_outlined, 'Printing & Share'),
   NavItem('/calendar', Icons.calendar_month_outlined, 'Calendar'),
   NavItem('/cheques', Icons.account_balance_wallet_outlined, 'Cheques'),
   NavItem('/upi-qr', Icons.qr_code, 'UPI QR'),
+  NavItem('/vehicles', Icons.directions_car_outlined, 'Vehicles & Fuel'),
+  NavItem('/file-manager', Icons.folder_outlined, 'File Manager'),
   NavItem('/recycle-bin', Icons.delete_outline, 'Recycle Bin'),
   NavItem('/companies', Icons.business_outlined, 'Multi-Company'),
   NavItem('/calculator', Icons.calculate_outlined, 'Calculator'),
@@ -107,6 +115,45 @@ class ShellScaffold extends StatelessWidget {
                       ))
                   .toList(),
             ),
+      drawer: isWide ? null : Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.teal),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(Icons.store, color: Colors.white, size: 40),
+                  SizedBox(height: 8),
+                  Text('CyberCafe ERP Pro',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            ..._navItems.map((n) {
+              final selected = _isSelected(location, n.path);
+              return ListTile(
+                leading: Icon(n.icon,
+                    color: selected ? Colors.teal : null),
+                title: Text(n.label,
+                    style: TextStyle(
+                        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                        color: selected ? Colors.teal : null)),
+                selected: selected,
+                onTap: () {
+                  Navigator.pop(context);
+                  context.go(n.path);
+                },
+              );
+            }),
+          ],
+        ),
+      ),
     );
   }
 
@@ -167,12 +214,19 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width >= 1100;
     return Container(
       height: 56,
       color: Theme.of(context).colorScheme.primaryContainer,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
+          if (!isWide)
+            IconButton(
+              icon: const Icon(Icons.menu),
+              tooltip: 'Menu',
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           Text(title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
@@ -185,7 +239,8 @@ class _TopBar extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            tooltip: 'Notifications',
+            onPressed: () => context.go('/calendar'),
           ),
         ],
       ),

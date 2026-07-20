@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../shared/providers/app_providers.dart';
 import '../../core/services/gst_service.dart';
+import '../../core/printing/pdf_invoice_service.dart';
 import '../../shared/models/bill.dart';
 
 class BillingListScreen extends StatefulWidget {
@@ -125,10 +128,27 @@ class _BillingListScreenState extends State<BillingListScreen> {
             ListTile(
                 leading: const Icon(Icons.print),
                 title: const Text('Print / PDF'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  try {
+                    final path = await PdfInvoiceService.generateAndSave(b);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('PDF saved: $path')));
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('PDF error: $e')));
+                    }
+                  }
+                }),
+            ListTile(
+                leading: const Icon(Icons.share),
+                title: const Text('WhatsApp Share'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Print: PDF export ready (see printing module)')));
+                  _shareWhatsApp(b);
                 }),
             ListTile(
                 leading: Icon(Icons.delete, color: Colors.red.shade700),
@@ -221,6 +241,33 @@ class _BillingListScreenState extends State<BillingListScreen> {
           ],
         ),
       );
+
+  void _shareWhatsApp(Bill b) async {
+    final msg = '*${b.billNumber}*\n'
+        'Date: ${b.billDate.substring(0, 10)}\n'
+        'Customer: ${b.customerName.isEmpty ? "Walk-in" : b.customerName}\n'
+        '${b.items.map((i) => '${i.name} × ${i.qty.toStringAsFixed(i.qty % 1 == 0 ? 0 : 2)} = ${GstService.formatMoney(i.total)}').join('\n')}\n'
+        '\n*Total: ${GstService.formatMoney(b.grandTotal)}*\n'
+        'Status: ${b.paymentStatus.toUpperCase()}';
+    final phone = b.customerPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    final url = phone.isNotEmpty
+        ? 'https://wa.me/$phone?text=${Uri.encodeComponent(msg)}'
+        : 'https://wa.me/?text=${Uri.encodeComponent(msg)}';
+    // Generate PDF first, then share
+    try {
+      final path = await PdfInvoiceService.generateAndSave(b);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('PDF saved: $path. Opening WhatsApp...')));
+      }
+    } catch (_) {}
+    if (!await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open WhatsApp')));
+      }
+    }
+  }
 
   Widget _emptyState(BuildContext context) => Center(
         child: Column(

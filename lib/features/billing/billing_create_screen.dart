@@ -6,6 +6,8 @@ import '../../shared/models/bill.dart';
 import '../../shared/models/customer.dart';
 import '../../shared/models/item.dart';
 import '../../core/services/gst_service.dart';
+import '../../core/database/db_helper.dart';
+import '../../core/printing/pdf_invoice_service.dart';
 
 class BillingCreateScreen extends StatefulWidget {
   const BillingCreateScreen({super.key});
@@ -47,6 +49,13 @@ class _BillingCreateScreenState extends State<BillingCreateScreen> {
   double get _grand => _taxable + _gst;
   double get _round => (_grand).roundToDouble() - _grand;
   double get _total => _grand + _round;
+  double get _change => _paid > _total ? _paid - _total : 0;
+
+  // GST breakup (intra-state: CGST+SGST, inter-state: IGST)
+  Map<String, double> get _gstBreakup {
+    final intraState = _customer?.state?.toLowerCase() != 'other';
+    return GstService.breakup(_taxable, _gst > 0 ? (_gst / _taxable * 100) : 0, intraState);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +226,30 @@ class _BillingCreateScreenState extends State<BillingCreateScreen> {
                             const Divider(),
                             _t('Grand Total', GstService.formatMoney(_total),
                                 big: true),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Expanded(child: Text('Amount Paid (₹):')),
+                                SizedBox(
+                                  width: 120,
+                                  child: TextField(
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                      hintText: '0',
+                                    ),
+                                    onChanged: (v) => setState(() {
+                                      _paid = double.tryParse(v) ?? 0;
+                                    }),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (_paid > 0)
+                              _t(_change > 0 ? 'Change' : 'Balance Due',
+                                  GstService.formatMoney(_change > 0 ? _change : (_total - _paid)),
+                                  big: _change > 0),
                           ],
                         ),
                       ),
@@ -414,12 +447,69 @@ class _BillingCreateScreenState extends State<BillingCreateScreen> {
           .toList(),
     );
     final id = await context.read<BillProvider>().create(bill);
+
+    // Decrement stock for each item sold
+    for (final l in _items) {
+      if (l.itemId != null) {
+        final item = await ItemRepository.get(l.itemId!);
+        if (item != null && !item.isService) {
+          await ItemRepository.upsert(item.copyWith(
+            stockQty: item.stockQty - l.qty,
+          ));
+        }
+      }
+    }
+
     if (mounted) {
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bill saved! ID #$id')));
-      context.go('/billing');
+      // Offer to print PDF
+      _offerPrint(bill);
     }
+  }
+
+  void _offerPrint(Bill bill) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Bill Saved!'),
+        content: const Text('What would you like to do next?'),
+        actions: [
+          TextButton(
+              onPressed: () { context.go('/billing'); },
+              child: const Text('Done')),
+          OutlinedButton.icon(
+            onPressed: () async {
+              try {
+                final path = await PdfInvoiceService.generateAndSave(bill);
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('PDF saved: $path')));
+                }
+              } catch (e) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('PDF error: $e')));
+                }
+              }
+              if (ctx.mounted) Navigator.pop(ctx);
+              context.go('/billing');
+            },
+            icon: const Icon(Icons.picture_as_pdf),
+            label: const Text('Save PDF'),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.go('/billing');
+            },
+            icon: const Icon(Icons.check),
+            label: const Text('New Bill'),
+          ),
+        ],
+      ),
+    );
   }
 }
 

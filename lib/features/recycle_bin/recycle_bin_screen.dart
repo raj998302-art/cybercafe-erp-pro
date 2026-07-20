@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../core/database/db_helper.dart';
 
@@ -54,13 +55,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
 
   Map<String, dynamic> _decode(String s) {
     try {
-      final d = s.replaceAll(RegExp(r'[{}"]'), '').split(',');
-      final m = <String, dynamic>{};
-      for (final e in d) {
-        final p = e.split(':');
-        if (p.length == 2) m[p[0].trim()] = p[1].trim();
-      }
-      return m;
+      return Map<String, dynamic>.from(jsonDecode(s) as Map);
     } catch (_) {
       return {};
     }

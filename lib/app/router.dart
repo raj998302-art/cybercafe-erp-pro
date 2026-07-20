@@ -9,18 +9,26 @@ import '../features/suppliers/supplier_screen.dart';
 import '../features/inventory/item_list_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/reports/report_screen.dart';
+import '../features/reports/daily_summary_screen.dart';
 import '../features/advanced_reports/advanced_reports_screen.dart';
 import '../features/gst/gst_screen.dart';
 import '../features/einvoice/einvoice_screen.dart';
+import '../features/purchase/gst_compliance_screen.dart' show GstComplianceScreen;
 import '../features/accounting/accounting_screen.dart';
+import '../features/accounting/accounting_extras_screen.dart';
+import '../features/purchase/purchase_screen.dart' show PurchaseScreen;
 import '../features/invoice_designer/invoice_designer_screen.dart';
 import '../features/payroll/payroll_screen.dart';
+import '../features/hr/hr_screen.dart';
 import '../features/expenses/expense_screen.dart';
 import '../features/calendar/calendar_screen.dart';
 import '../features/cheques/cheque_screen.dart';
 import '../features/upi_qr/upi_qr_screen.dart';
 import '../features/recycle_bin/recycle_bin_screen.dart';
 import '../features/multi_company/multi_company_screen.dart';
+import '../features/vehicles/vehicle_screen.dart';
+import '../features/printing_system/printing_system_screen.dart';
+import '../features/file_manager/file_manager_screen.dart';
 import '../features/calculator/calculator_screen.dart';
 import '../features/notes/notes_screen.dart';
 import '../features/help/help_screen.dart';
@@ -30,17 +38,8 @@ class AppRouter {
   static final config = GoRouter(
     initialLocation: '/',
     routes: [
-      GoRoute(
-        path: '/login',
-        name: 'login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/customer/:id',
-        builder: (context, state) => CustomerDetailScreen(
-          customerId: int.parse(state.pathParameters['id']!),
-        ),
-      ),
+      GoRoute(path: '/login', name: 'login', builder: (c, s) => const LoginScreen()),
+      GoRoute(path: '/customer/:id', builder: (c, s) => CustomerDetailScreen(customerId: int.parse(s.pathParameters['id']!))),
       ShellRoute(
         builder: (context, state, child) => ShellScaffold(child: child),
         routes: [
@@ -50,17 +49,25 @@ class AppRouter {
           GoRoute(path: '/customers', name: 'customers', builder: (c, s) => const CustomerListScreen()),
           GoRoute(path: '/suppliers', name: 'suppliers', builder: (c, s) => const SupplierScreen()),
           GoRoute(path: '/inventory', name: 'inventory', builder: (c, s) => const ItemListScreen()),
+          GoRoute(path: '/purchase', name: 'purchase', builder: (c, s) => const PurchaseScreen()),
           GoRoute(path: '/accounting', name: 'accounting', builder: (c, s) => const AccountingScreen()),
+          GoRoute(path: '/accounting-extras', name: 'accounting-extras', builder: (c, s) => const AccountingExtrasScreen()),
           GoRoute(path: '/expenses', name: 'expenses', builder: (c, s) => const ExpenseScreen()),
+          GoRoute(path: '/payroll', name: 'payroll', builder: (c, s) => const PayrollScreen()),
+          GoRoute(path: '/hr', name: 'hr', builder: (c, s) => const HrScreen()),
           GoRoute(path: '/gst', name: 'gst', builder: (c, s) => const GstScreen()),
+          GoRoute(path: '/gst-compliance', name: 'gst-compliance', builder: (c, s) => const GstComplianceScreen()),
           GoRoute(path: '/einvoice', name: 'einvoice', builder: (c, s) => const EInvoiceScreen()),
           GoRoute(path: '/reports', name: 'reports', builder: (c, s) => const ReportScreen()),
+          GoRoute(path: '/daily-summary', name: 'daily-summary', builder: (c, s) => const DailySummaryScreen()),
           GoRoute(path: '/advanced-reports', name: 'advanced-reports', builder: (c, s) => const AdvancedReportsScreen()),
-          GoRoute(path: '/payroll', name: 'payroll', builder: (c, s) => const PayrollScreen()),
           GoRoute(path: '/designer', name: 'designer', builder: (c, s) => const InvoiceDesignerScreen()),
+          GoRoute(path: '/printing', name: 'printing', builder: (c, s) => const PrintingSystemScreen()),
           GoRoute(path: '/calendar', name: 'calendar', builder: (c, s) => const CalendarScreen()),
           GoRoute(path: '/cheques', name: 'cheques', builder: (c, s) => const ChequeScreen()),
           GoRoute(path: '/upi-qr', name: 'upi-qr', builder: (c, s) => const UpiQrScreen()),
+          GoRoute(path: '/vehicles', name: 'vehicles', builder: (c, s) => const VehicleScreen()),
+          GoRoute(path: '/file-manager', name: 'file-manager', builder: (c, s) => const FileManagerScreen()),
           GoRoute(path: '/recycle-bin', name: 'recycle-bin', builder: (c, s) => const RecycleBinScreen()),
           GoRoute(path: '/companies', name: 'companies', builder: (c, s) => const MultiCompanyScreen()),
           GoRoute(path: '/calculator', name: 'calculator', builder: (c, s) => const CalculatorScreen()),

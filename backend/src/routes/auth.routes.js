@@ -54,8 +54,12 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-router.get('/me', protect, async (req, res) => {
-  return sendSuccess(res, { user: req.user });
+router.get('/me', protect, async (req, res, next) => {
+  try {
+    return sendSuccess(res, { user: req.user });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post('/change-password', protect, async (req, res, next) => {

@@ -16,6 +16,10 @@ router.get('/', async (_req, res, next) => {
 router.put('/', async (req, res, next) => {
   try {
     const body = req.body;
+    // Prevent overwriting immutable fields
+    delete body._id;
+    delete body.__v;
+    delete body.createdAt;
     const company = await Company.findOne();
     if (company) {
       Object.assign(company, body);

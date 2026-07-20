@@ -63,6 +63,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                         itemBuilder: (context, i) {
                           final c = p.items[i];
                           return ListTile(
+                            onTap: () => context.go('/customer/${c.id}'),
                             leading: CircleAvatar(
                               backgroundColor: Colors.indigo.shade50,
                               child: Text(c.name.isNotEmpty
@@ -101,6 +102,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     final email = TextEditingController(text: customer?.email ?? '');
     final gstin = TextEditingController(text: customer?.gstin ?? '');
     final address = TextEditingController(text: customer?.address ?? '');
+    final state = TextEditingController(text: customer?.state ?? '');
     final opening = TextEditingController(
         text: (customer?.openingBalance ?? 0).toStringAsFixed(0));
     showDialog(
@@ -118,6 +120,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                 _f('Email', email),
                 _f('GSTIN', gstin, upper: true),
                 _f('Address', address, max: 2),
+                _f('State (for GST intra/inter-state)', state),
                 _f('Opening Balance', opening, num: true),
               ],
             ),
@@ -137,6 +140,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                     email: email.text.trim(),
                     gstin: gstin.text.trim().toUpperCase(),
                     address: address.text.trim(),
+                    state: state.text.trim(),
                     openingBalance:
                         double.tryParse(opening.text) ?? 0,
                   ));
